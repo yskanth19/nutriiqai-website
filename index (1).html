@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutri IQ — Food Intelligence for Athletes</title>
+  <meta name="description" content="AI-powered nutrition scanner built for athletes. Scan any food and get instant personalised guidance based on your sport, diet and health.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00CC6A;
+      --dark: #080810;
+      --dark2: #0d0d1a;
+      --card: #0f0f1c;
+      --border: rgba(255,255,255,0.06);
+      --border-green: rgba(0,204,106,0.2);
+      --text: rgba(255,255,255,0.85);
+      --muted: rgba(255,255,255,0.4);
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--dark); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,8,16,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--font-display); font-size: 28px; letter-spacing: 3px; color: #fff; text-decoration: none; display: flex; flex-direction: column; line-height: 1; }
+    .nav-logo span { color: var(--green); }
+    .nav-logo-sub { font-family: var(--font-mono); font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.3); font-weight: 500; margin-top: 3px; }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; letter-spacing: 0.5px; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { background: var(--green) !important; color: #001a0d !important; padding: 9px 20px !important; border-radius: 8px !important; font-weight: 800 !important; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; position: relative;
+      display: flex; align-items: center; overflow: hidden;
+      padding: 120px 60px 80px;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(0,204,106,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 20%, rgba(0,100,200,0.04) 0%, transparent 40%), var(--dark);
+    }
+    .hero-grid {
+      position: absolute; inset: 0; opacity: 0.025;
+      background-image: linear-gradient(rgba(0,204,106,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,204,106,1) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-scanline {
+      position: absolute; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.3; animation: scan 4s ease-in-out infinite;
+    }
+    @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 0.3; } 90% { opacity: 0.3; } 100% { top: 100%; opacity: 0; } }
+    .hero-accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green) 30%, var(--green) 70%, transparent); }
+
+    .hero-content { position: relative; z-index: 10; max-width: 640px; animation: fadeUp 0.8s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border-green); border-radius: 6px;
+      padding: 6px 14px; background: rgba(0,204,106,0.06); margin-bottom: 28px;
+    }
+    .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 8px var(--green); } 50% { box-shadow: 0 0 16px var(--green); } }
+    .hero-badge-text { font-family: var(--font-mono); font-size: 11px; color: var(--green); letter-spacing: 1px; }
+
+    .hero-title { font-family: var(--font-display); font-size: clamp(72px, 9vw, 110px); line-height: 0.92; letter-spacing: 2px; color: #fff; margin-bottom: 12px; }
+    .hero-title .green { color: var(--green); }
+    .hero-title .dim { color: rgba(255,255,255,0.2); }
+
+    .hero-sub { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 460px; margin-bottom: 40px; }
+
+    .hero-buttons { display: flex; gap: 14px; align-items: center; margin-bottom: 52px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--green); color: #001a0d; font-size: 15px; font-weight: 800;
+      padding: 16px 28px; border-radius: 12px; text-decoration: none;
+      box-shadow: 0 6px 28px rgba(0,204,106,0.3); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0,204,106,0.4); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7);
+      font-size: 14px; font-weight: 600; padding: 15px 24px;
+      border-radius: 12px; text-decoration: none; border: 1px solid var(--border);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--border-green); color: #fff; }
+
+    .hero-stats { display: flex; gap: 36px; flex-wrap: wrap; }
+    .hero-stat-num { font-family: var(--font-display); font-size: 36px; color: var(--green); letter-spacing: 1px; line-height: 1; }
+    .hero-stat-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; margin-top: 4px; }
+
+    /* Phone */
+    .hero-visual {
+      position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+      z-index: 10; animation: floatPhone 3s ease-in-out infinite;
+    }
+    @keyframes floatPhone { 0%,100% { transform: translateY(-50%); } 50% { transform: translateY(calc(-50% - 16px)); } }
+    .phone-glow {
+      position: absolute; width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,204,106,0.12) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
+    }
+    .phone-frame {
+      width: 256px; height: 512px; background: #111; border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 80px; height: 22px; background: #000; border-radius: 12px; z-index: 10; }
+    .phone-screen { width: 100%; height: 100%; background: #0f0f1a; display: flex; flex-direction: column; padding: 48px 14px 14px; gap: 9px; }
+    .ps-header { font-size: 16px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 2px; }
+    .ps-food { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; text-align: center; }
+    .ps-food-name { font-size: 13px; font-weight: 800; color: #fff; }
+    .ps-food-meta { font-size: 9px; color: var(--muted); margin-top: 2px; }
+    .ps-rating { border-radius: 10px; padding: 9px 10px; display: flex; align-items: center; gap: 8px; }
+    .ps-rating.green { background: rgba(0,229,122,0.1); border: 1px solid rgba(0,229,122,0.3); }
+    .ps-rating-emoji { font-size: 18px; }
+    .ps-rating-text { font-size: 12px; font-weight: 700; color: #00e57a; }
+    .ps-bullets { display: flex; flex-direction: column; gap: 5px; }
+    .ps-bullet { display: flex; align-items: flex-start; gap: 6px; background: rgba(255,255,255,0.03); border-radius: 7px; padding: 6px 8px; }
+    .ps-bullet-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 5px; }
+    .ps-bullet-text { font-size: 9px; color: var(--muted); line-height: 1.5; }
+    .ps-sources { background: rgba(0,204,106,0.06); border: 1px solid rgba(0,204,106,0.15); border-radius: 7px; padding: 7px; font-size: 8px; color: rgba(0,204,106,0.7); text-align: center; }
+
+    /* SECTIONS */
+    section { padding: 100px 60px; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--green); letter-spacing: 3px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--border-green); }
+    .section-title { font-family: var(--font-display); font-size: clamp(48px, 6vw, 80px); color: #fff; line-height: 0.95; letter-spacing: 1px; margin-bottom: 20px; }
+    .section-title span { color: var(--green); }
+    .section-desc { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 500px; }
+
+    /* FEATURES */
+    #features { background: var(--dark2); }
+    .features-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; gap: 40px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px;
+      position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover { border-color: var(--border-green); transform: translateY(-4px); }
+    .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); opacity: 0; transition: opacity 0.3s; }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card.featured { border-color: var(--border-green); background: linear-gradient(135deg, rgba(0,204,106,0.06), var(--card)); }
+    .feature-card.featured::before { opacity: 1; }
+    .feature-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(0,204,106,0.08); border: 1px solid var(--border-green); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
+    .feature-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .feature-tag { display: inline-block; margin-top: 14px; background: rgba(0,204,106,0.08); border: 1px solid var(--border-green); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 0.5px; }
+
+    /* HOW IT WORKS */
+    #how { background: var(--dark); position: relative; overflow: hidden; }
+    #how::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(0,204,106,0.05) 0%, transparent 60%); pointer-events: none; }
+    .how-header { margin-bottom: 72px; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+    .steps::before { content: ''; position: absolute; top: 32px; left: calc(12.5% + 24px); right: calc(12.5% + 24px); height: 1px; background: linear-gradient(90deg, var(--green), rgba(0,204,106,0.2)); }
+    .step { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 20px; }
+    .step-num-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--card); border: 2px solid var(--border-green); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; z-index: 1; box-shadow: 0 0 20px rgba(0,204,106,0.15); }
+    .step-icon { font-size: 28px; }
+    .step-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* SCREENSHOTS */
+    #screenshots { background: var(--dark2); }
+    .screenshots-header { margin-bottom: 56px; }
+    .screenshots-scroll { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: thin; scrollbar-color: var(--green) transparent; }
+    .screenshot-item { flex-shrink: 0; width: 220px; }
+    .screenshot-frame {
+      width: 220px; height: 440px; border-radius: 28px; background: #111;
+      border: 2px solid rgba(255,255,255,0.08); overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4); transition: transform 0.3s, border-color 0.3s;
+    }
+    .screenshot-frame:hover { transform: translateY(-6px); border-color: var(--border-green); }
+    .screenshot-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .screenshot-label { font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; margin-top: 12px; }
+
+    /* DOWNLOAD */
+    #download { background: var(--dark); text-align: center; position: relative; overflow: hidden; }
+    #download::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 100%, rgba(0,204,106,0.08) 0%, transparent 60%); pointer-events: none; }
+    .download-content { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+    .download-icon { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #001a0d, #003d20); border: 2px solid var(--border-green); display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0 auto 28px; box-shadow: 0 0 40px rgba(0,204,106,0.2); }
+    .download-title { font-family: var(--font-display); font-size: clamp(48px, 7vw, 88px); color: #fff; line-height: 0.95; letter-spacing: 1px; margin-bottom: 20px; }
+    .download-title span { color: var(--green); }
+    .download-desc { font-size: 16px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; }
+    .download-buttons { display: flex; gap: 14px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+    .store-btn { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 22px; text-decoration: none; transition: border-color 0.2s, background 0.2s, transform 0.2s; }
+    .store-btn:hover { border-color: var(--border-green); background: rgba(0,204,106,0.06); transform: translateY(-2px); }
+    .store-btn-icon { font-size: 28px; }
+    .store-btn-sub { font-size: 10px; color: var(--muted); font-weight: 500; }
+    .store-btn-name { font-size: 15px; font-weight: 800; color: #fff; margin-top: 1px; }
+    .download-note { font-size: 12px; color: rgba(255,255,255,0.2); }
+    .download-note span { color: var(--green); }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 36px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: 2px; color: #fff; text-decoration: none; display: flex; flex-direction: column; line-height: 1; }
+    .footer-logo span { color: var(--green); }
+    .footer-logo-sub { font-family: var(--font-mono); font-size: 7px; letter-spacing: 3px; color: rgba(255,255,255,0.25); font-weight: 500; margin-top: 3px; }
+    .footer-links { display: flex; gap: 28px; list-style: none; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: #fff; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 60px; }
+      .hero-visual { display: none; }
+      section { padding: 72px 24px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+      .steps::before { display: none; }
+      .features-header { flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <span style="color:#fff;font-family:var(--font-display);font-size:28px;letter-spacing:3px;">NUTRI <span style="color:var(--green);">IQ</span></span>
+      <span class="nav-logo-sub">FOOD INTELLIGENCE</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="mailto:support@nutriiqai.com">Support</a></li>
+      <li><a href="https://apps.apple.com/app/nutri-iq-food-intelligence/id6764622835" class="nav-cta">Download Free →</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-accent"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        <span class="hero-badge-text">NOW LIVE ON APP STORE</span>
+      </div>
+      <h1 class="hero-title">EAT<br><span class="green">SMART.</span><br><span class="dim">WIN MORE.</span></h1>
+      <p class="hero-sub">AI-powered nutrition scanner built specifically for athletes. Scan any food and get instant personalised guidance based on your sport, diet and health conditions.</p>
+      <div class="hero-buttons">
+        <a href="https://apps.apple.com/app/nutri-iq-food-intelligence/id6764622835" class="btn-primary">🍎 Download on App Store</a>
+        <a href="#how" class="btn-secondary">See how it works →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num">50+</div><div class="hero-stat-label">SPORTS</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">40+</div><div class="hero-stat-label">CONDITIONS</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">14</div><div class="hero-stat-label">LANGUAGES</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">SCAN MODES</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-glow"></div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="ps-header">🧠 Nutri IQ</div>
+          <div class="ps-food">
+            <div class="ps-food-name">BROWN RICE</div>
+            <div class="ps-food-meta">Pre-workout · Medium · Badminton</div>
+          </div>
+          <div class="ps-rating green">
+            <span class="ps-rating-emoji">✅</span>
+            <span class="ps-rating-text">Recommended</span>
+          </div>
+          <div class="ps-bullets">
+            <div class="ps-bullet"><div class="ps-bullet-dot"></div><span class="ps-bullet-text">Excellent complex carbs for sustained badminton energy</span></div>
+            <div class="ps-bullet"><div class="ps-bullet-dot"></div><span class="ps-bullet-text">Low GI — ideal for pre-workout sustained release</span></div>
+            <div class="ps-bullet"><div class="ps-bullet-dot"></div><span class="ps-bullet-text">Consider white rice for faster digestion before match</span></div>
+          </div>
+          <div class="ps-sources">📚 Based on ACSM · IOC · ISSN guidelines</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="features-header">
+      <div>
+        <div class="section-label">FEATURES</div>
+        <h2 class="section-title">BUILT FOR<br><span>ATHLETES</span></h2>
+      </div>
+      <p class="section-desc">Every feature is designed with one goal — helping athletes make better food decisions, faster.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card featured">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">AI-Powered Analysis</div>
+        <div class="feature-desc">Claude AI analyses every food against your complete athlete profile — sport, diet, health conditions, goals and training timing.</div>
+        <span class="feature-tag">CORE FEATURE</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📷</div>
+        <div class="feature-title">3 Scan Modes</div>
+        <div class="feature-desc">Photo scan, barcode scan, or manual search. Scan anything from restaurant plates to packaged supermarket food.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏅</div>
+        <div class="feature-title">50+ Sports</div>
+        <div class="feature-desc">From badminton to weightlifting to marathon running — recommendations tailored to your sport's specific energy demands.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Competition-Day Ready</div>
+        <div class="feature-desc">Every scan includes a dedicated game-day verdict so you always know what's safe to eat before competition.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🩺</div>
+        <div class="feature-title">Health-Aware</div>
+        <div class="feature-desc">40+ medical conditions supported including Crohn's disease, diabetes, hypertension and more — your health always comes first.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">14 Languages</div>
+        <div class="feature-desc">Get recommendations in your language — English, Hindi, Telugu, Tamil, Spanish, Arabic, French, German and more.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="how-header">
+      <div class="section-label">HOW IT WORKS</div>
+      <h2 class="section-title">SCAN. ANALYSE.<br><span>PERFORM.</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-icon">👤</span></div>
+        <div class="step-title">Build Your Profile</div>
+        <div class="step-desc">Set your sport, diet, medical conditions, goals and language. Takes 2 minutes.</div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-icon">📷</span></div>
+        <div class="step-title">Scan Any Food</div>
+        <div class="step-desc">Photo, barcode or type the food name. Works with any food anywhere in the world.</div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-icon">🧠</span></div>
+        <div class="step-title">AI Analyses</div>
+        <div class="step-desc">Claude AI checks your full profile against the food's nutritional profile instantly.</div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-icon">✅</span></div>
+        <div class="step-title">Get Your Rating</div>
+        <div class="step-desc">GREEN, AMBER or RED with full explanation, game-day verdict and local food alternatives.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS — using your real files -->
+  <section id="screenshots">
+    <div class="screenshots-header">
+      <div class="section-label">SCREENSHOTS</div>
+      <h2 class="section-title">SEE IT IN<br><span>ACTION</span></h2>
+    </div>
+    <div class="screenshots-scroll">
+
+      <div class="screenshot-item">
+        <div class="screenshot-frame">
+          <img src="homescreen.png" alt="Nutri IQ Home Screen">
+        </div>
+        <div class="screenshot-label">Home Dashboard</div>
+      </div>
+
+      <div class="screenshot-item">
+        <div class="screenshot-frame">
+          <img src="scanscreen.png" alt="Nutri IQ Scan Screen">
+        </div>
+        <div class="screenshot-label">Food Scanner</div>
+      </div>
+
+      <div class="screenshot-item">
+        <div class="screenshot-frame">
+          <img src="recommendation.png" alt="Nutri IQ AI Recommendation">
+        </div>
+        <div class="screenshot-label">AI Recommendation</div>
+      </div>
+
+      <div class="screenshot-item">
+        <div class="screenshot-frame">
+          <img src="restriction.png" alt="Nutri IQ Diet Restriction">
+        </div>
+        <div class="screenshot-label">Diet Protection</div>
+      </div>
+
+      <div class="screenshot-item">
+        <div class="screenshot-frame">
+          <img src="scanhistory.png" alt="Nutri IQ Scan History">
+        </div>
+        <div class="screenshot-label">Scan History</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download">
+    <div class="download-content">
+      <div class="download-icon">🧠</div>
+      <h2 class="download-title">START EATING<br><span>SMARTER</span></h2>
+      <p class="download-desc">Download Nutri IQ for free. No subscription. No hidden fees. Just smart nutrition guidance for athletes.</p>
+      <div class="download-buttons">
+        <a href="https://apps.apple.com/app/nutri-iq-food-intelligence/id6764622835" class="store-btn">
+          <span class="store-btn-icon">🍎</span>
+          <div><div class="store-btn-sub">Download on the</div><div class="store-btn-name">App Store</div></div>
+        </a>
+        <a href="#" class="store-btn">
+          <span class="store-btn-icon">▶️</span>
+          <div><div class="store-btn-sub">Coming soon to</div><div class="store-btn-name">Google Play</div></div>
+        </a>
+      </div>
+      <p class="download-note">Free to download · <span>iOS 14.0+</span> · Android coming soon</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-logo">
+      <span style="font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:#fff;">NUTRI <span style="color:var(--green);">IQ</span></span>
+      <span class="footer-logo-sub">FOOD INTELLIGENCE</span>
+    </a>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="https://yskanth19.github.io/nutriiq-privacy/privacy-policy.html">Privacy Policy</a></li>
+      <li><a href="https://yskanth19.github.io/nutriiq-privacy/sources.html">Sources</a></li>
+      <li><a href="mailto:support@nutriiqai.com">Support</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 Nutri IQ Food Intelligence</p>
+  </footer>
+
+</body>
+</html>
